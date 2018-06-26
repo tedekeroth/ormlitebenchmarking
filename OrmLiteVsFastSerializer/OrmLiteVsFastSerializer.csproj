@@ -32,18 +32,41 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AlfaCommons">
-      <HintPath>..\..\..\..\[GIT]\Alfa\AlfaCommons\bin\Debug\AlfaCommons.dll</HintPath>
+    <Reference Include="AlfaCommons, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\[GIT]\Alfa\AlfaCommons\bin\x64\Release\AlfaCommons.dll</HintPath>
     </Reference>
-    <Reference Include="CoreCommons">
-      <HintPath>..\..\..\..\[GIT]\Alfa\AlfaCommons\bin\Debug\CoreCommons.dll</HintPath>
+    <Reference Include="CoreCommons, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\[GIT]\Alfa\AlfaCommons\bin\x64\Release\CoreCommons.dll</HintPath>
     </Reference>
     <Reference Include="MySql.Data, Version=6.9.12.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>..\packages\MySql.Data.6.9.12\lib\net45\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Protocol">
-      <HintPath>..\..\..\..\[GIT]\Alfa\AlfaCommons\bin\Debug\Protocol.dll</HintPath>
+    <Reference Include="Protocol, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\[GIT]\Alfa\AlfaCommons\bin\x64\Release\Protocol.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Common, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
       <HintPath>..\packages\ServiceStack.Common.5.0.0\lib\net45\ServiceStack.Common.dll</HintPath>
@@ -61,7 +84,7 @@
       <HintPath>..\packages\ServiceStack.Text.5.0.0\lib\net45\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="SQLController">
-      <HintPath>..\..\..\..\[GIT]\Core\Misc\SQLController.dll</HintPath>
+      <HintPath>..\..\..\..\[GIT]\Alfa\Server\LauncherGUI\bin\x64\Release\SQLController.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
