@@ -7,8 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using tWorks.Alfa.AlfaCommons.Actors;
-using tWorks.Core.CoreCommons;
 
 namespace OrmLiteVsFastSerializer
 {
@@ -49,6 +47,7 @@ namespace OrmLiteVsFastSerializer
         private void InitOrmLite()
         {
             JsConfig.IncludeTypeInfo = true;
+            
 
             _dbFactory = new OrmLiteConnectionFactory($"Uid={dbUsername};Password={dbPassword};Server={dbAddress};Port={dbPort};Database={dbDatabase}", MySqlDialect.Provider);
             SetTableMeta();
