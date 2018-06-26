@@ -5,7 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using tWorks.Alfa.AlfaCommons.Actors;
 using tWorks.Core.CoreCommons;
+using tWorks.SQLController;
 using tWorks.SQLController.MySQL;
 
 namespace OrmLiteVsFastSerializer
@@ -30,15 +32,46 @@ namespace OrmLiteVsFastSerializer
         public void Save<T>(T coreObject)
         {
             PropertyInfo[] pInfos = coreObject.GetType().GetProperties();
-            string valueString = string.Join(",", pInfos.Select(x => x.Name));
-            string values = "";
-            foreach(PropertyInfo pInfo in pInfos)
+            string fields = string.Join(",", pInfos.Select(x => $"{x.Name}"));
+            string values = string.Join(",", pInfos.Select(x => $"@{x.Name}"));
+            MySqlCommand cmd = new MySqlCommand($"INSERT INTO customer ({fields}) VALUES ({values})");
+
+            foreach (PropertyInfo pInfo in pInfos)
             {
-                //pInfo.PropertyType.IsPrimitive
+                cmd.Parameters.AddWithValue(pInfo.Name, pInfo.GetValue(coreObject));
+            }
+            SQL_Result result = mysqlHandler.Execute(cmd);
+        }
+
+        internal List<Customer> FetchAll()
+        {
+            MySqlCommand cmd = new MySqlCommand($"SELECT * FROM customer");
+            SQL_Result result = mysqlHandler.ExecuteQuery(cmd);
+
+            PropertyInfo[] pInfos = typeof(Customer).GetProperties();
+
+            List<Customer> customers = new List<Customer>();
+            for (int i = 0; i < result.rows.Count; i++)
+            {
+                Customer c = new Customer();
+                foreach (PropertyInfo pInfo in pInfos)
+                {
+                    object o = result.Get(i, pInfo.Name);
+                    if (o is null || o is DBNull)
+                        continue;
+                    try
+                    {
+                        pInfo.SetValue(c, Convert.ChangeType(o, pInfo.PropertyType));
+                    }
+                    catch(Exception e)
+                    {
+
+                    }
+                }
+                customers.Add(c);
             }
 
-            MySqlCommand cmd = new MySqlCommand($"INSERT INTO customers ({valueString}) VALUES ({values})");
-            //mysqlHandler.Execute()
+            return customers;
         }
     }
 }

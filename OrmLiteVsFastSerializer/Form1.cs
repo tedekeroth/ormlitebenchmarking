@@ -19,6 +19,8 @@ namespace OrmLiteVsFastSerializer
     {
         OrmLiteDbHandler ormLiteDbHandler;
         DbHandler dbHandler;
+        RelationalDbHandler relDbHandler;
+
         Stopwatch sw;
        
         public Form1()
@@ -37,6 +39,15 @@ namespace OrmLiteVsFastSerializer
             dbHandler = new DbHandler();
             dbHandler.OnLogEvent += DbHandler_OnLogEvent;
             dbHandler.Start();
+
+            relDbHandler = new RelationalDbHandler();
+            relDbHandler.OnLogEvent += RelDbHandler_OnLogEvent;
+            relDbHandler.Start();
+        }
+
+        private void RelDbHandler_OnLogEvent(object sender, string e)
+        {
+            Log(e);
         }
 
         private void DbHandler_OnLogEvent(object sender, string e)
@@ -74,9 +85,13 @@ namespace OrmLiteVsFastSerializer
                     {
                         ormLiteDbHandler.Save(c);
                     }
-                    else
+                    else if (radioButton2.Checked)
                     {
                         dbHandler.AddCoreObjectTabelledToDatabase(counter, typeof(Customer), c, c.Serialize());
+                    }
+                    else if (radioButton3.Checked)
+                    {
+                        relDbHandler.Save(c);
                     }
                     counter++;
                 }
@@ -132,9 +147,13 @@ namespace OrmLiteVsFastSerializer
                 {
                     customers = ormLiteDbHandler.FetchAll<Customer>();
                 }
-                else
+                else if (radioButton2.Checked)
                 {
                     customers = dbHandler.ReadObjectsTabelled<Customer>();
+                }
+                else if (radioButton3.Checked)
+                {
+                    customers = relDbHandler.FetchAll();
                 }
 
                 sw.Stop();
