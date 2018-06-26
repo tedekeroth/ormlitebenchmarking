@@ -80,7 +80,7 @@ namespace OrmLiteVsFastSerializer
                 {
                     if (radioButton1.Checked)
                     {
-                        ormLiteDbHandler.Save(c);
+                        ormLiteDbHandler.MyTestMethod(c);
                         name = "OrmLite";
                     }
                     //else if (radioButton2.Checked)

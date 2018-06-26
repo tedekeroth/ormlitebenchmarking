@@ -31,12 +31,37 @@ namespace OrmLiteVsFastSerializer
             InitOrmLite();
         }
 
-        public void Save<T>(T coreObject) where T : CoreObject
+        private void InitOrmLite()
         {
+            JsConfig.IncludeTypeInfo = true;
+
+            _dbFactory = new OrmLiteConnectionFactory($"Uid={dbUsername};Password={dbPassword};Server={dbAddress};Port={dbPort};Database={dbDatabase}", MySqlDialect.Provider);
+            SetTableMeta();
+        }
+
+        public void MyTestMethod<T>(T coreObject) where T : CoreObject
+        {
+            long id = 0;
             using (var _db = _dbFactory.Open())
             {
-                _db.Insert<T>(coreObject);
-            }
+                id = _db.Insert<T>(coreObject, selectIdentity: true);
+
+                if (DateTime.Now.Ticks == 0)
+                {
+                    coreObject.Id = (uint)id;
+                    _db.Delete(coreObject);
+                }
+                if (DateTime.Now.Ticks == 0)
+                {
+                    _db.DeleteById<Customer>(id);
+                }
+                if (DateTime.Now.Ticks == 0)
+                {
+                    coreObject.Id = (uint)id;
+                    coreObject.ObjectName = "FUCK A DUCK";
+                    _db.Update<Customer>(coreObject);
+                }
+            }           
         }
 
         public T Fetch<T>(uint coreObjectId) where T : CoreObject
@@ -44,14 +69,7 @@ namespace OrmLiteVsFastSerializer
             return null;
         }
 
-        private void InitOrmLite()
-        {
-            JsConfig.IncludeTypeInfo = true;
-            
-
-            _dbFactory = new OrmLiteConnectionFactory($"Uid={dbUsername};Password={dbPassword};Server={dbAddress};Port={dbPort};Database={dbDatabase}", MySqlDialect.Provider);
-            SetTableMeta();
-        }
+        
 
         private void SetTableMeta()
         {
@@ -75,6 +93,22 @@ namespace OrmLiteVsFastSerializer
             {
                 List<T> list = _db.Select<T>();
                 return list;
+            }
+        }
+
+        internal void Delete(Customer customer)
+        {
+            using (var _db = _dbFactory.Open())
+            {
+                int i = _db.Delete(customer);
+            }
+        }
+
+        internal void Delete(uint id)
+        {
+            using (var _db = _dbFactory.Open())
+            {
+                int i = _db.DeleteById<Customer>(id);
             }
         }
     }
