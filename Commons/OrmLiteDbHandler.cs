@@ -1,5 +1,4 @@
-﻿using OrmLiteVsFastSerializer.Interfaces;
-using ServiceStack.OrmLite;
+﻿using ServiceStack.OrmLite;
 using ServiceStack.Text;
 using System;
 using System.Collections.Generic;
@@ -7,10 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using tWorks.Alfa.AlfaCommons.Actors;
-using tWorks.Core.CoreCommons;
 
-namespace OrmLiteVsFastSerializer
+
+namespace Commons
 {
     public class OrmLiteDbHandler
     {
@@ -42,38 +40,15 @@ namespace OrmLiteVsFastSerializer
             SetTableMeta();
         }
 
-        public void MyTestMethod<T>(T coreObject) where T : CoreObject
+        public void AddRow<T>(T coreObject) where T : CoreObject
         {
             long id = 0;
             using (var _db = _dbFactory.Open())
             {
                 id = _db.Insert<T>(coreObject, selectIdentity: true);
-
-                if (DateTime.Now.Ticks == 0)
-                {
-                    coreObject.Id = (uint)id;
-                    _db.Delete(coreObject);
-                }
-                if (DateTime.Now.Ticks == 0)
-                {
-                    _db.DeleteById<Customer>(id);
-                }
-                if (DateTime.Now.Ticks == 0)
-                {
-                    coreObject.Id = (uint)id;
-                    coreObject.ObjectName = "FUCK A DUCK";
-                    _db.Update(coreObject);
-                }
             }           
         }
-
-        public T Fetch<T>(uint coreObjectId) where T : CoreObject
-        {
-            return null;
-        }
-
         
-
         private void SetTableMeta()
         {
             // We get the current assembly through the current class
@@ -90,7 +65,7 @@ namespace OrmLiteVsFastSerializer
             OnLogEvent?.Invoke(this, $"{stuff.Count} table meta data initialized");
         }
 
-        internal List<T> FetchAll<T>()
+        public List<T> FetchAll<T>()
         {
             using (var _db = _dbFactory.Open())
             {

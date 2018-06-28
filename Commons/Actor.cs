@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrmLiteVsFastSerializer
+namespace Commons
 {
     [Serializable]
     public class Actor : CoreObject
@@ -26,7 +26,6 @@ namespace OrmLiteVsFastSerializer
       
         public Actor()
         {
-            this.ContactInfo = new List<ContactItem>();
             this.ContactDetails = new ContactDetails(new List<ContactItem>(), null, null);
         }
 
@@ -36,45 +35,10 @@ namespace OrmLiteVsFastSerializer
 
         public uint _ActorRole { get; set; }
 
-        /// <summary>
-        /// Used for deciding how an actor may connect to the system, such as Website, OperatorClient etc. The Type is supposed to be a ContactType
-        /// </summary>
         public List<Type> _AllowedLoginChannels { get; set; }
 
-        /// <summary>
-        /// Contains a list of all available contact items, the default and the current contact item.
-        /// </summary>
-        // 2016-01-10:  Att lägga till attribut strular rejält med jefla CoreObjectTabelled.
-        //              Olika saker utgår från att fälten i ContactDetails finns i tabellen, vilket det inte gör, och yada yada.
-        //    [Attributes.Property("kontaktinformation")]
-        //  
         public ContactDetails ContactDetails { get; set; }
-
-        /// <summary>
-        /// OBSOLETE! Use ContactDetails instead.
-        /// </summary>
-        [Obsolete]
-        public List<ContactItem> ContactInfo
-        {
-            get
-            {
-                if (ContactDetails != null)
-                    return ContactDetails.ContactItemList;
-                else
-                    return null;
-            }
-            set
-            {
-                if (ContactDetails != null)
-                    ContactDetails.ContactItemList = value;
-            }
-        }
-
-        /// <summary>
-        /// OBSOLETE! Use ContactDetails instead.
-        /// </summary>
-        /// <value>The current contact item.</value>
-        [Obsolete]
+        
         public ContactItem CurrentContactItem
         {
             get
@@ -90,11 +54,7 @@ namespace OrmLiteVsFastSerializer
                     ContactDetails.CurrentContactItem = value;
             }
         }
-
-        /// <summary>
-        /// OBSOLETE! Use ContactDetails instead.
-        /// </summary>
-        [Obsolete]
+        
         public ContactItem DefaultContactItem
         {
             get
@@ -111,32 +71,20 @@ namespace OrmLiteVsFastSerializer
             }
         }
 
-        /// <summary>
-        /// The first name of the actor/user.
-        /// </summary>
         public string Firstname
         {
             get { return _firstname; }
             set { _firstname = value; }
         }
 
-        /// <summary>
-        /// Det valda språket för denna användare
-        /// </summary>
        public uint Language { get; set; }
 
-        /// <summary>
-        /// The last name of the actor/user.
-        /// </summary>
         public string Lastname
         {
             get { return _lastname; }
             set { _lastname = value; }
         }
 
-        /// <summary>
-        /// The username of the actor, such as "8102151435" or "EHakansson". Must be unique among all actors
-        /// </summary>
         public string Username
         {
 

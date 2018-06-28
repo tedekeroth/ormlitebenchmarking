@@ -1,5 +1,4 @@
-﻿using OrmLiteVsFastSerializer.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +7,9 @@ using ServiceStack.OrmLite;
 using ServiceStack.DataAnnotations;
 using ServiceStack;
 using System.Data;
-using tWorks.Alfa.AlfaCommons.Actors;
+using Commons;
 
-namespace OrmLiteVsFastSerializer.MetaDataImplementations
+namespace OrmLiteTests
 {
     internal class MetaDataCustomer : IOrmLiteTableMetaData
     {

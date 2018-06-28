@@ -9,13 +9,16 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using tWorks.Alfa.AlfaCommons.Actors;
+using tWorks.Alfa.AlfaCommons.Actors.ContactItems;
+using tWorks.Core.CoreCommons.Actors;
 
 namespace OrmLiteVsFastSerializer
 {
     public partial class Form1 : Form
     {
         OrmLiteDbHandler ormLiteDbHandler;
-        //DbHandler dbHandler;
+        DbHandler dbHandler;
         RelationalDbHandler relDbHandler;
         DapperDbHandler dapperDbHandler;
         Stopwatch sw;
@@ -33,9 +36,9 @@ namespace OrmLiteVsFastSerializer
             ormLiteDbHandler.OnLogEvent += OrmLiteDbHandler_OnLogEvent;
             ormLiteDbHandler.Start();
 
-            //dbHandler = new DbHandler();
-            //dbHandler.OnLogEvent += DbHandler_OnLogEvent;
-            //dbHandler.Start();
+            dbHandler = new DbHandler();
+            dbHandler.OnLogEvent += DbHandler_OnLogEvent;
+            dbHandler.Start();
 
             relDbHandler = new RelationalDbHandler();
             relDbHandler.OnLogEvent += RelDbHandler_OnLogEvent;
@@ -74,7 +77,7 @@ namespace OrmLiteVsFastSerializer
                 CreateCustomers();
                 sw.Reset();
                 sw.Start();
-                //uint counter = dbHandler.GetAutoIncrementValue<Customer>() + 1;
+                uint counter = dbHandler.GetAutoIncrementValue<Customer>() + 1;
                 string name = "";
                 foreach (Customer c in customers)
                 {
@@ -83,11 +86,11 @@ namespace OrmLiteVsFastSerializer
                         ormLiteDbHandler.MyTestMethod(c);
                         name = "OrmLite";
                     }
-                    //else if (radioButton2.Checked)
-                    //{
-                    //    dbHandler.AddCoreObjectTabelledToDatabase(counter, typeof(Customer), c, c.Serialize());
-                    //    name = "Alfa";
-                    //}
+                    else if (radioButton2.Checked)
+                    {
+                        dbHandler.AddCoreObjectTabelledToDatabase(counter, typeof(Customer), c, c.Serialize());
+                        name = "Alfa";
+                    }
                     else if (radioButton3.Checked)
                     {
                         relDbHandler.Save(c);
@@ -98,7 +101,7 @@ namespace OrmLiteVsFastSerializer
                         dapperDbHandler.Insert(c);
                         name = "Dapper";
                     }
-                    //counter++;
+                    counter++;
                 }
                 sw.Stop();
                 Log($"CREATE {name} took\t{sw.ElapsedMilliseconds} ms");
@@ -129,6 +132,10 @@ namespace OrmLiteVsFastSerializer
                 Customer c = new Customer(RandomString(10), RandomString(5), RandomString(4));
                 c.Username = RandomString(4);
                 c.ContactDetails = new ContactDetails();
+                c.ContactDetails.ContactItemList.Add(new AlfaOnline(RandomString(10), RandomString(5), RandomString(6)));
+                c._CustomerSettings = new CustomerSettings();
+                c._CustomerSettings.CustomerConnect_NotifCancelled = true;
+                c._CustomerSettings.CustomerConnect_NotifNoShowed = false;
                 c.Century = 19;
                 c.CustomerNumber = RandomString(5);
                 c.ZipCode = RandomString(5);
@@ -152,10 +159,10 @@ namespace OrmLiteVsFastSerializer
                 {
                     customers = ormLiteDbHandler.FetchAll<Customer>();
                 }
-                //else if (radioButton2.Checked)
-                //{
-                //    customers = dbHandler.ReadObjectsTabelled<Customer>();
-                //}
+                else if (radioButton2.Checked)
+                {
+                    customers = dbHandler.ReadObjectsTabelled<Customer>();
+                }
                 else if (radioButton3.Checked)
                 {
                     customers = relDbHandler.FetchAll();
