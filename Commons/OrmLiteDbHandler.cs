@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
+using static ServiceStack.Text.Tracer;
 
 namespace Commons
 {
@@ -35,6 +35,7 @@ namespace Commons
         {
             JsConfig.IncludeTypeInfo = true;
             OrmLiteConfig.ThrowOnError = JsConfig.ThrowOnError = true;
+            Tracer.Instance = new ConsoleTracer();
             //OrmLiteConfig.BeforeExecFilter = dbCmd => Console.WriteLine(dbCmd.GetDebugString());
             _dbFactory = new OrmLiteConnectionFactory($"Uid={dbUsername};Password={dbPassword};Server={dbAddress};Port={dbPort};Database={dbDatabase};SslMode=None", MySqlDialect.Provider);
             SetTableMeta();

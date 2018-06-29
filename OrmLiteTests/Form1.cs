@@ -100,6 +100,7 @@ namespace OrmLiteTests
                     PopulatePrimitives(c);
                     c._CustomerSettings = new CustomerSettings();
                     c.ContactDetails = new ContactDetails();
+                    c.ContactDetails.ContactItemList = new List<ContactItem>();
                     c.ContactDetails.ContactItemList.Add(new AlfaOnline(RandomString(3), RandomString(5), RandomString(8)));
                     c.CurrentContactItem = new AlfaOnline(RandomString(5), RandomString(5), RandomString(5));
                 }
