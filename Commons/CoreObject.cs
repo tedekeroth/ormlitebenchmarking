@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VelocityDb;
 
 namespace Commons
 {
     [Serializable]
-    public class CoreObject : IComparable
+    public class CoreObject : OptimizedPersistable, IComparable
     {
         #region Fields (3) 
 
@@ -79,12 +80,7 @@ namespace Commons
         /// </summary>
         /// <value>The id</value>
        
-        public uint Id
-        {
-            get { return _id; }
-            set { _id = value; }
-        }
-
+      
         public string ObjectName { get; set; }
 
 
@@ -121,15 +117,7 @@ namespace Commons
             else
                 return false;
         }
-
-      
-        
-        public override int GetHashCode()
-        {
-            return (int)(Id + int.MinValue); //(uint -> int)
-        }
-
-     
+            
 
         //Sätter värdet om det inte är null, annars tar bort det från customdata
         public void _SetCustomProperty(string key, object value)

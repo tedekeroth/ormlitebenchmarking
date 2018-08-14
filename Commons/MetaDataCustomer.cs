@@ -11,27 +11,22 @@ using Commons;
 
 namespace OrmLiteTests
 {
-    internal class MetaDataCustomer : IOrmLiteTableMetaData
+    internal class MetaDataCustomer : MetaDataBaseClass
     {
-        public Type SetTableMetaData(OrmLiteConnectionFactory dbFactory)
+        protected override Type GetCoreObjectType()
         {
-            Type type = typeof(Customer);
-            type.GetProperty(nameof(Customer.Id)).AddAttributes(new PrimaryKeyAttribute(), new AutoIncrementAttribute());
-                
+            return typeof(Customer);
+        }
+
+        protected override void SetSpecificTableMetaData(OrmLiteConnectionFactory dbFactory)
+        {
+            Type type = GetCoreObjectType();
+            type.AddAttributes(new AliasAttribute("APA_" + type.Name));
             type.GetProperty(nameof(Customer.PopulationRegistryNumber)).AddAttributes(new IndexAttribute { Unique = false });
             type.GetProperty(nameof(Customer.Firstname)).AddAttributes(new IndexAttribute { Unique = false });
             type.GetProperty(nameof(Customer._MiddleName)).AddAttributes(new IndexAttribute { Unique = false });
             type.GetProperty(nameof(Customer.Lastname)).AddAttributes(new IndexAttribute { Unique = false });
-            type.GetProperty(nameof(Customer.Username)).AddAttributes(new IndexAttribute { Unique = false });
             type.GetProperty(nameof(Customer.Century)).AddAttributes(new IndexAttribute { Unique = false });
-
-            using (var _db = dbFactory.Open())
-            {
-                // AlterTable will create if not exist, otherwise add columns that was added to the PCO
-                _db.AlterTable<Customer>(MySqlDialect.Provider);
-            }
-            
-            return type;
         }
     }
 }

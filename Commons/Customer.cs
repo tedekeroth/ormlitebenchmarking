@@ -68,6 +68,8 @@ namespace Commons
 
         #region Properties (8) 
 
+        public TimeSpan MyTimeSpan { get; set; }
+
         public uint Century
         {
             get { return _century; }
@@ -250,6 +252,14 @@ namespace Commons
         public Sexes _GetSexFromPopulationRegistryId()
         {
            return Sexes.Male;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+
+            return true;
         }
 
     }

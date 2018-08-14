@@ -36,8 +36,11 @@ namespace System.Data
 
         public static void AlterTable<T>(this IDbConnection db, IOrmLiteDialectProvider provider) where T : new()
         {
+            
+            ModelDefinition md = new ModelDefinition();
+            md.ModelType = typeof(T);
+            
             var model = ModelDefinition<T>.Definition;
-            var table = new T();
             var namingStrategy = provider.NamingStrategy;
             // just create the table if it doesn't already exist
             var tableName = namingStrategy.GetTableName(model.ModelName);

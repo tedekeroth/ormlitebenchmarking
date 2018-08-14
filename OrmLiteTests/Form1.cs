@@ -1,10 +1,13 @@
 ﻿using Commons;
+using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +18,7 @@ namespace OrmLiteTests
     public partial class Form1 : Form
     {
         OrmLiteDbHandler ormLiteDbHandler;
+        VeolcityDbHandler veloDbHandler;
         Stopwatch sw;
 
         public Form1()
@@ -26,6 +30,8 @@ namespace OrmLiteTests
 
         private void Form1_HandleCreated(object sender, EventArgs e)
         {
+            veloDbHandler = new VeolcityDbHandler();
+            veloDbHandler.ClearAll<Customer>();
             ormLiteDbHandler = new OrmLiteDbHandler();
             ormLiteDbHandler.OnLogEvent += OrmLiteDbHandler_OnLogEvent;
             ormLiteDbHandler.Start();
@@ -55,11 +61,35 @@ namespace OrmLiteTests
                 sw.Start();
                 foreach (Customer c in customers)
                 {
-                    ormLiteDbHandler.AddRow(c);
+                    CoreObject co = (CoreObject)c;
+                    ormLiteDbHandler.AddRow(co);
                 }
                 sw.Stop();
                 Log($"CREATE took\t{sw.ElapsedMilliseconds} ms");
                 sw.Reset();
+
+                sw.Start();
+                veloDbHandler.InsertList(customers);
+                sw.Stop();
+                Log($"CREATE VeloDb InsertList took\t{sw.ElapsedMilliseconds} ms");
+                sw.Reset();
+
+                sw.Start();
+                int i = 0;
+                foreach (Customer c in customers)
+                {
+                    CoreObject co = (CoreObject)c;
+                    veloDbHandler.Insert(co);
+                    i++;
+                    if (i % 50 == 0)
+                    {
+                        double speed = (i + 0.0) / (sw.ElapsedMilliseconds / 1000.0);
+                        Log($"VeloSpeed: {speed} rec/s ({sw.ElapsedMilliseconds / 1000.0} seconds, {i} rec)");
+                    }
+                }
+                sw.Stop();
+                Log($"CREATE VelocityDB took\t{sw.ElapsedMilliseconds} ms");
+
                 Invoke((MethodInvoker)delegate
                 {
                     button1.Enabled = true;
@@ -103,6 +133,12 @@ namespace OrmLiteTests
                     c.ContactDetails.ContactItemList = new List<ContactItem>();
                     c.ContactDetails.ContactItemList.Add(new AlfaOnline(RandomString(3), RandomString(5), RandomString(8)));
                     c.CurrentContactItem = new AlfaOnline(RandomString(5), RandomString(5), RandomString(5));
+
+                    c._CustomProperties.Add("MyBoolTest", true);
+                    c._CustomProperties.Add("MyOtherBoolTest", false);
+                    c._CustomProperties.Add("MyDateTimeTest", DateTime.Now);
+                    c._SetCustomProperty("Settings", new CustomerSettings() { CustomerConnect_NotifCancelled = true, NotifFinished = true });
+                    c._SetCustomProperty("MyList", new List<uint> { 1, 2, 3, 4 });
                 }
                 customers.Add(c);
             }
@@ -141,18 +177,146 @@ namespace OrmLiteTests
                 customers.Clear();
 
                 sw.Reset();
+                //sw.Start();
+                //List<CoreObject> list = ormLiteDbHandler.FetchAll(typeof(Customer));
+                //sw.Stop();
+                //Log($"REFLECTION LOAD took\t{sw.ElapsedMilliseconds} ms, loaded {list.Count} customers");
+                //sw.Reset();
+                //Console.WriteLine($"MyBoolTest={list[10]._CustomProperties["MyBoolTest"]}");
+                //Console.WriteLine($"MyOtherBoolTest={list[10]._CustomProperties["MyOtherBoolTest"]}");
+                //Console.WriteLine($"MyDateTimeTest={list[10]._CustomProperties["MyDateTimeTest"]}");
                 sw.Start();
-
                 customers = ormLiteDbHandler.FetchAll<Customer>();
-
                 sw.Stop();
                 Log($"LOAD took\t{sw.ElapsedMilliseconds} ms, loaded {customers.Count} customers");
+
+                customers.Clear();
                 sw.Reset();
+                customers = veloDbHandler.ReadAll<Customer>();
+
                 Invoke((MethodInvoker)delegate
                 {
                     button2.Enabled = true;
                 });
             });
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            //uint id = ormLiteDbHandler.GetHighestCoreObjectId();
+
+            //CoreActionSettings cas = new CoreActionSettings();
+            //cas.Id = 3;
+            //cas._AvailableActions = new List<ActionInfo>();
+            //cas._AvailableActions.Add(new ActionInfo("Test", "desc", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test2", "desc2", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test4", "desc4", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test4asd", "asddesc4", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test", "desc", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test2", "desc2", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test4", "desc4", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test4asd", "asddesc4", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test", "desc", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test2", "desc2", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test4", "desc4", new List<ParameterInfo>()));
+            //cas._AvailableActions.Add(new ActionInfo("Test4asd", "asddesc4", new List<ParameterInfo>()));
+            //cas._AvailablePoints = new List<string>();
+            //cas._AvailablePoints.Add("Str1");
+            //cas._AvailablePoints.Add("Str2");
+            //ormLiteDbHandler.AddRow<CoreActionSettings>(cas);
+
+            //ModuleController mc = new ModuleController("test", new List<Type>() { typeof(Customer) });
+            ////mc.ContactTypes.Add(null);
+            //mc.ContactDetails.ContactItemList.Add(new CoreClient());
+            //ormLiteDbHandler.AddRow<ModuleController>(mc);
+
+            ormLiteDbHandler.TestStringSerializers();
+        }
+
+        private R GetPoolAndRun<R>(Func<OrmLiteDbHandler, R> theFunction)
+        {
+            R result = default(R);
+
+            int poolCounter = 0;
+            while (poolCounter < 3)
+            {
+                try
+                {
+                    result = theFunction(ormLiteDbHandler);
+                    return result;
+                }
+                catch(Exception e)
+                {
+                    // Something is wrong, we will try the next pool
+                    Console.WriteLine(e);
+                }
+                poolCounter++;
+            }
+            return default(R);
+        }
+
+        private void test()
+        {
+            ormLiteDbHandler.CustomSelect("");
+            CoreObject co = ormLiteDbHandler.Get<Customer>(3);
+            ormLiteDbHandler.Delete(co);
+        }
+
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+
+            //Dictionary<ushort, Dictionary<tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges, HashSet<uint>>> latDictionary;
+            //latDictionary = new Dictionary<ushort, Dictionary<tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges, HashSet<uint>>>();
+            //latDictionary.Add(1, new Dictionary<tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges, HashSet<uint>>());
+            //latDictionary[1].Add(tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3, new HashSet<uint>());
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(1);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(2);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(3);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(4);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(5);
+
+            //latDictionary[1].Add(tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km9, new HashSet<uint>());
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(1);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(2);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(3);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(4);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(5);
+
+            //latDictionary[1].Add(tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km27, new HashSet<uint>());
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(1);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(2);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(3);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(4);
+            //latDictionary[1][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(5);
+
+            //latDictionary.Add(2, new Dictionary<tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges, HashSet<uint>>());
+            //latDictionary[2].Add(tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3, new HashSet<uint>());
+            //latDictionary[2][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(1);
+            //latDictionary[2][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(2);
+            //latDictionary[2][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(3);
+            //latDictionary[2][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(4);
+            //latDictionary[2][tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges.Km3].Add(5);
+
+            //string json = JsonConvert.SerializeObject(latDictionary, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+
+            string json = File.ReadAllText("TextFile1.txt");
+            ormLiteDbHandler.Test2(json, typeof(Dictionary<ushort, Dictionary<tWorks.Alfa.AlfaCommons.Geo.Geography.Ranges, HashSet<uint>>>));
+            
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            ormLiteDbHandler.Test3();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            VeolcityDbHandler dbHandler = new VeolcityDbHandler();
+            radioButton4.Checked = true;
+            CreateCustomers();
+            ulong id = dbHandler.Insert(customers[0]);
+            Console.WriteLine($"Velo: {id}");
         }
     }
 }
